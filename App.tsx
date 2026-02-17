@@ -12,6 +12,7 @@ const App: React.FC = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTransactions();
@@ -20,6 +21,7 @@ const App: React.FC = () => {
   const fetchTransactions = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const { data, error } = await supabase
         .from('transactions')
         .select('*')
@@ -30,8 +32,9 @@ const App: React.FC = () => {
       if (data) {
         setTransactions(data as Transaction[]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching transactions:', error);
+      setError(error.message || 'Erro ao buscar transações');
     } finally {
       setIsLoading(false);
     }
@@ -104,6 +107,13 @@ const App: React.FC = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {error && (
+          <div className="mb-6 bg-red-500/10 border border-red-500/50 text-red-500 p-4 rounded-xl flex items-center justify-between">
+            <p>Erro: {error}</p>
+            <button onClick={fetchTransactions} className="underline hover:no-underline">Tentar novamente</button>
+          </div>
+        )}
 
         {/* Header Section */}
         <div className="mb-8 flex items-end justify-between">
